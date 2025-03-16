@@ -16,6 +16,8 @@ const Login_fin = () => {
       password: "",
     },
     onSubmit: (values) => {
+      // Verify form submission
+      console.log("Form submitted");
       // Handle form submission
       console.log(values);
     },
