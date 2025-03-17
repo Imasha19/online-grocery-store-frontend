@@ -3,6 +3,7 @@ import { useFormik } from "formik";
 import { useDispatch, useSelector } from "react-redux";
 import * as Yup from "yup";
 import { loginUserAction } from "../../redux/slices/users/userSlices";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 
 // Form validation
 const formSchema = Yup.object({
@@ -12,6 +13,7 @@ const formSchema = Yup.object({
 
 const Login_fin = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate(); // Initialize useNavigate
   const { userLoading, userAppErr, userServerErr, isLogin, userAuth } = useSelector((state) => state.user);
 
   // Initialize form
@@ -31,6 +33,10 @@ const Login_fin = () => {
       console.log("User information:", userAuth);
     }
   }, [isLogin, userAuth]);
+
+  const navigateToRegister = () => {
+    navigate("/register"); // Navigate to registration page
+  };
 
   return (
     <section
@@ -91,6 +97,17 @@ const Login_fin = () => {
                   {userLoading ? "Loading..." : "Login"}
                 </button>
               </form>
+
+              {/* Sign Up link */}
+              <p className="mt-4 text-muted">
+                Don't you have an account?{" "}
+                <button
+                  className="btn btn-link text-primary p-0"
+                  onClick={navigateToRegister} // Navigate to register page
+                >
+                  Sign Up
+                </button>
+              </p>
             </div>
           </div>
         </div>

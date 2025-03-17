@@ -1,8 +1,9 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useDispatch, useSelector } from "react-redux";
 import { registerUserAction } from "../../redux/slices/users/userSlices";
+import { useNavigate } from "react-router-dom"; // Import useNavigate from react-router-dom
 
 // Form validation
 const formSchema = Yup.object({
@@ -23,7 +24,11 @@ const formSchema = Yup.object({
 
 const Register_fin = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate(); // Initialize useNavigate
   const { userLoading, userAppErr, userServerErr, isLogin, userAuth } = useSelector((state) => state.user);
+
+  // State for success message
+  const [successMessage, setSuccessMessage] = useState("");
 
   // Initialize form
   const formik = useFormik({
@@ -42,8 +47,20 @@ const Register_fin = () => {
   useEffect(() => {
     if (isLogin) {
       console.log("User information:", userAuth);
+      // Set success message if registration is successful
+      setSuccessMessage("Registration successful!");
+
+      // Redirect to login page after 2 seconds
+      setTimeout(() => {
+        navigate("/login"); // Navigate to login page
+      }, 2000); // Wait for 2 seconds before redirecting
     }
-  }, [isLogin, userAuth]);
+  }, [isLogin, userAuth, navigate]);
+
+  // Navigate to login page when Sign In button is clicked
+  const navigateToLogin = () => {
+    navigate("/login");
+  };
 
   return (
     <section className="position-relative py-5 overflow-hidden vh-100">
@@ -59,7 +76,7 @@ const Register_fin = () => {
               <hr className="text-warning w-100" />
             </div>
           </div>
-          <div className="col-12 col-lg-5 ms-auto">
+          <div className="col-12 col-lg-5 ms-auto ">
             <div className="p-5 bg-light rounded text-center">
               <span className="text-muted">New User</span>
               <h3 className="fw-bold mb-5">Register</h3>
@@ -68,7 +85,12 @@ const Register_fin = () => {
                   {userAppErr || userServerErr}
                 </div>
               ) : null}
-              <form onSubmit={formik.handleSubmit}>
+              {successMessage && (
+                <div className="alert alert-success" role="alert">
+                  {successMessage}
+                </div>
+              )}
+              <form onSubmit={formik.handleSubmit} >
                 <input
                   value={formik.values.firstname}
                   onBlur={formik.handleBlur("firstname")}
@@ -125,6 +147,16 @@ const Register_fin = () => {
                   {userLoading ? "Loading..." : "Register"}
                 </button>
               </form>
+              {/* Sign In Button */}
+              <p className="mt-3">
+                Already have an account?{" "}
+                <button
+                  className="btn btn-link"
+                  onClick={navigateToLogin}
+                >
+                  Sign In
+                </button>
+              </p>
             </div>
           </div>
         </div>
