@@ -31,12 +31,9 @@ const Login_fin = () => {
   useEffect(() => {
     if (isLogin) {
       console.log("User information:", userAuth);
+      navigate("/home_fin"); // Navigate to home page after successful login
     }
-  }, [isLogin, userAuth]);
-
-  const navigateToRegister = () => {
-    navigate("/register"); // Navigate to registration page
-  };
+  }, [isLogin, userAuth, navigate]);
 
   return (
     <section
@@ -103,7 +100,7 @@ const Login_fin = () => {
                 Don't you have an account?{" "}
                 <button
                   className="btn btn-link text-primary p-0"
-                  onClick={navigateToRegister} // Navigate to register page
+                  onClick={() => navigate("/register")} // Navigate to register page
                 >
                   Sign Up
                 </button>
