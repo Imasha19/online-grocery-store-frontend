@@ -1,16 +1,30 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import { useDispatch, useSelector } from "react-redux";
+import { registerUserAction } from "../../redux/slices/users/userSlices";
 
 // Form validation
 const formSchema = Yup.object({
-  email: Yup.string().required("Email is required"),
-  password: Yup.string().required("Password is required"),
+  email: Yup.string()
+    .email("Invalid email address")
+    .matches(/^[a-zA-Z0-9._%+-]+@finmem\.gmail\.com$/, "Unauthorized email address")
+    .required("Email is required"),
+  password: Yup.string()
+    .min(8, "Password must be at least 8 characters")
+    .matches(/[a-z]/, "Password must contain at least one lowercase letter")
+    .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .matches(/[0-9]/, "Password must contain at least one number")
+    .matches(/[!@#$%^&*(),.?":{}|<>]/, "Password must contain at least one special character")
+    .required("Password is required"),
   firstname: Yup.string().required("First name is required"),
   lastname: Yup.string().required("Last name is required"),
 });
 
 const Register_fin = () => {
+  const dispatch = useDispatch();
+  const { userLoading, userAppErr, userServerErr, isLogin, userAuth } = useSelector((state) => state.user);
+
   // Initialize form
   const formik = useFormik({
     initialValues: {
@@ -20,11 +34,16 @@ const Register_fin = () => {
       lastname: "",
     },
     onSubmit: (values) => {
-      // Handle form submission
-      console.log(values);
+      dispatch(registerUserAction(values));
     },
     validationSchema: formSchema,
   });
+
+  useEffect(() => {
+    if (isLogin) {
+      console.log("User information:", userAuth);
+    }
+  }, [isLogin, userAuth]);
 
   return (
     <section className="position-relative py-5 overflow-hidden vh-100">
@@ -44,6 +63,11 @@ const Register_fin = () => {
             <div className="p-5 bg-light rounded text-center">
               <span className="text-muted">New User</span>
               <h3 className="fw-bold mb-5">Register</h3>
+              {userAppErr || userServerErr ? (
+                <div className="alert alert-danger" role="alert">
+                  {userAppErr || userServerErr}
+                </div>
+              ) : null}
               <form onSubmit={formik.handleSubmit}>
                 <input
                   value={formik.values.firstname}
@@ -96,8 +120,9 @@ const Register_fin = () => {
                 <button
                   type="submit"
                   className="btn btn-primary py-2 w-100 mb-4"
+                  disabled={userLoading}
                 >
-                  Register
+                  {userLoading ? "Loading..." : "Register"}
                 </button>
               </form>
             </div>
