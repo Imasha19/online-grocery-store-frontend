@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useFormik } from "formik";
+import { useDispatch, useSelector } from "react-redux";
 import * as Yup from "yup";
+import { loginUserAction } from "../../redux/slices/users/userSlices";
 
 // Form validation
 const formSchema = Yup.object({
@@ -9,6 +11,9 @@ const formSchema = Yup.object({
 });
 
 const Login_fin = () => {
+  const dispatch = useDispatch();
+  const { userLoading, userAppErr, userServerErr, isLogin, userAuth } = useSelector((state) => state.user);
+
   // Initialize form
   const formik = useFormik({
     initialValues: {
@@ -16,13 +21,16 @@ const Login_fin = () => {
       password: "",
     },
     onSubmit: (values) => {
-      // Verify form submission
-      console.log("Form submitted");
-      // Handle form submission
-      console.log(values);
+      dispatch(loginUserAction(values));
     },
     validationSchema: formSchema,
   });
+
+  useEffect(() => {
+    if (isLogin) {
+      console.log("User information:", userAuth);
+    }
+  }, [isLogin, userAuth]);
 
   return (
     <section
@@ -45,6 +53,11 @@ const Login_fin = () => {
             <div className="p-5 bg-light rounded text-center">
               <span className="text-muted">Sign In</span>
               <h3 className="fw-bold mb-5">Login to your account</h3>
+              {userAppErr || userServerErr ? (
+                <div className="alert alert-danger" role="alert">
+                  {userAppErr || userServerErr}
+                </div>
+              ) : null}
               <form onSubmit={formik.handleSubmit}>
                 <input
                   value={formik.values.email}
@@ -73,8 +86,9 @@ const Login_fin = () => {
                 <button
                   type="submit"
                   className="btn btn-primary py-2 w-100 mb-4"
+                  disabled={userLoading}
                 >
-                  Login
+                  {userLoading ? "Loading..." : "Login"}
                 </button>
               </form>
             </div>
