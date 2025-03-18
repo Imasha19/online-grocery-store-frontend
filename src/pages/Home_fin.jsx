@@ -31,7 +31,7 @@ const FinanceWelcome = () => {
           <button onClick={() => navigate("/dashboard")} className="px-4 py-2 bg-gray-700 rounded-lg shadow-md hover:bg-gray-900">
             Dashboard
           </button>
-          <button onClick={() => navigate("/profile")} className="px-4 py-2 bg-gray-700 rounded-lg shadow-md hover:bg-gray-900">
+        <button onClick={() => navigate("/profile")} className="px-4 py-2 bg-gray-700 rounded-lg shadow-md hover:bg-gray-900">
             Profile
           </button>
         </div>
