@@ -1,43 +1,80 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
 import bg from "../img/finance.jpg";
 import dataSvg from "../img/data.svg";
 
-const Home_fin = () => {
+const FinanceWelcome = () => {
+  const navigate = useNavigate();
+
+  // Handle Logout
+  const handleLogout = () => {
+    // Perform any logout logic here (e.g., clearing user session)
+    navigate("/"); // Redirect to Wlcm.jsx after logout
+  };
+
   return (
-    <section
-      className="relative min-h-screen w-screen flex items-center justify-center bg-cover bg-center"
-      style={{
-        backgroundImage: `url(${bg})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
+    <div
+      className="min-h-screen flex flex-col bg-cover bg-center text-white"
+      style={{ backgroundImage: `url(${bg})` }}
     >
-      {/* Dark Overlay for readability */}
-      <div className="absolute inset-0 bg-black/40"></div>
-
-      {/* Content on top of the background */}
-      <div className="relative z-10 text-center text-white max-w-[500px] px-6">
-        <img src={dataSvg} alt="Data" className="mb-5 w-[60%] h-auto mx-auto" />
-        <h2 className="text-3xl font-extrabold mb-4">
-          Track Your Income & Expenses
-        </h2>
-        <p className="text-lg leading-relaxed">
-          Get a clear overview of your income and expenses in one powerful dashboard.
-        </p>
-
-        <div className="mt-6 flex flex-wrap justify-center gap-4">
-          <Link
-            to="/profile"
-            className="bg-gradient-to-r from-blue-500 to-blue-700 text-white py-3 px-6 rounded-lg shadow-md transition duration-300 hover:from-blue-600 hover:to-blue-800 transform hover:scale-105"
-            style={{ textDecoration: "none" }}
-          >
-            Track Your Performance
-          </Link>
+      {/* Header with Navigation Buttons */}
+      <header className="w-full bg-black bg-opacity-50 backdrop-blur-md p-4 shadow-md flex justify-between items-center">
+        {/* Left Side Navigation */}
+        <div className="flex space-x-4">
+          <button onClick={() => navigate("/expenses")} className="px-4 py-2 bg-gray-700 rounded-lg shadow-md hover:bg-gray-900">
+            Expenses List
+          </button>
+          <button onClick={() => navigate("/income")} className="px-4 py-2 bg-gray-700 rounded-lg shadow-md hover:bg-gray-900">
+            Income List
+          </button>
+          <button onClick={() => navigate("/dashboard")} className="px-4 py-2 bg-gray-700 rounded-lg shadow-md hover:bg-gray-900">
+            Dashboard
+          </button>
+          <button onClick={() => navigate("/profile")} className="px-4 py-2 bg-gray-700 rounded-lg shadow-md hover:bg-gray-900">
+            Profile
+          </button>
         </div>
-      </div>
-    </section>
+
+        {/* Right Side Actions */}
+        <div className="flex space-x-4">
+          <button onClick={() => navigate("/new-expense")} className="px-4 py-2 bg-green-600 rounded-lg shadow-md hover:bg-green-800">
+            New Expense
+          </button>
+          <button onClick={() => navigate("/new-income")} className="px-4 py-2 bg-blue-600 rounded-lg shadow-md hover:bg-blue-800">
+            New Income
+          </button>
+          <button onClick={handleLogout} className="px-4 py-2 bg-red-600 rounded-lg shadow-md hover:bg-red-800">
+            Logout
+          </button>
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <section className="flex-grow flex items-center justify-center px-6 text-center">
+        <div className="max-w-2xl">
+          <img src={dataSvg} alt="Finance Data" className="mb-6 w-32 mx-auto" />
+          <h2 className="text-4xl font-bold drop-shadow-md">Manage Your Finances with Ease</h2>
+          <p className="text-lg text-gray-300 mt-3">
+            Keep track of your income and expenses effortlessly with our powerful financial dashboard.
+          </p>
+          <div className="mt-6">
+            <button
+              onClick={() => navigate("/performance")}
+              className="bg-yellow-500 text-white py-3 px-6 rounded-lg shadow-md transition duration-300 hover:bg-yellow-600"
+            >
+              Track Your Performance
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="w-full bg-black bg-opacity-50 text-white text-center py-4">
+        <p>&copy; 2025 Finance Tracker | All rights reserved.</p>
+      </footer>
+    </div>
   );
 };
 
-export default Home_fin;
+export default FinanceWelcome;
