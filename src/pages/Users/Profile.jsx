@@ -60,7 +60,23 @@ const Profile = () => {
                 )}
               </div>
 
-             
+              {/* New Buttons */}
+              <div className="flex justify-center gap-4 mt-6">
+                <button
+                  onClick={() => navigate("/expenses")}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition duration-200"
+                >
+                  View Expenses History
+                </button>
+
+                <button
+                  onClick={() => navigate("/income")}
+                  className="px-6 py-2 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition duration-200"
+                >
+                  View Income History
+                </button>
+              </div>
+
             </div>
           </div>
         )}

@@ -22,7 +22,7 @@ const FinanceWelcome = () => {
       <header className="w-full bg-black bg-opacity-50 backdrop-blur-md p-4 shadow-md flex justify-between items-center">
         {/* Left Side Navigation */}
         <div className="flex space-x-4">
-          <button onClick={() => navigate("/expenses")} className="px-4 py-2 bg-gray-700 rounded-lg shadow-md hover:bg-gray-900">
+          <button onClick={() => navigate("/expenses-list")} className="px-4 py-2 bg-gray-700 rounded-lg shadow-md hover:bg-gray-900">
             Expenses List
           </button>
           <button onClick={() => navigate("/income")} className="px-4 py-2 bg-gray-700 rounded-lg shadow-md hover:bg-gray-900">
