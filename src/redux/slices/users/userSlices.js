@@ -3,6 +3,7 @@ import axios from "axios";
 import baseURL from "../../../utils/baseURL";
 
 // Login action
+// Login action
 export const loginUserAction = createAsyncThunk(
   'user/login',
   async (payload, { rejectWithValue }) => {
@@ -13,7 +14,12 @@ export const loginUserAction = createAsyncThunk(
     };
     try {
       const { data } = await axios.post(`${baseURL}/users/login`, payload, config);
-      return data;
+      
+      // Store token in localStorage on successful login
+      localStorage.setItem('token', data.token);
+      
+
+      return data; // Return the login data (token, user info, etc.)
     } catch (error) {
       if (!error?.response) {
         throw error;
@@ -22,6 +28,7 @@ export const loginUserAction = createAsyncThunk(
     }
   }
 );
+
 
 // Register action
 export const registerUserAction = createAsyncThunk(

@@ -1,16 +1,27 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux"; // Import useSelector to get the user state from Redux store
 
 import bg from "../img/finance.jpg";
 import dataSvg from "../img/data.svg";
 
 const FinanceWelcome = () => {
   const navigate = useNavigate();
+  const userAuth = useSelector((state) => state.user.userAuth); // Get userAuth from Redux store
 
   // Handle Logout
   const handleLogout = () => {
     // Perform any logout logic here (e.g., clearing user session)
     navigate("/"); // Redirect to Wlcm.jsx after logout
+  };
+
+  // Handle navigation to Expenses List
+  const handleExpensesListClick = () => {
+    if (userAuth?.isAdmin) {
+      navigate("/expenses-list");
+    } else {
+      alert("You do not have permission to view the Expenses List.");
+    }
   };
 
   return (
@@ -22,29 +33,50 @@ const FinanceWelcome = () => {
       <header className="w-full bg-black bg-opacity-50 backdrop-blur-md p-4 shadow-md flex justify-between items-center">
         {/* Left Side Navigation */}
         <div className="flex space-x-4">
-          <button onClick={() => navigate("/expenses-list")} className="px-4 py-2 bg-gray-700 rounded-lg shadow-md hover:bg-gray-900">
+          <button
+            onClick={handleExpensesListClick} // Use the function here
+            className="px-4 py-2 bg-gray-700 rounded-lg shadow-md hover:bg-gray-900"
+          >
             Expenses List
           </button>
-          <button onClick={() => navigate("/income")} className="px-4 py-2 bg-gray-700 rounded-lg shadow-md hover:bg-gray-900">
+          <button
+            onClick={() => navigate("/income")}
+            className="px-4 py-2 bg-gray-700 rounded-lg shadow-md hover:bg-gray-900"
+          >
             Income List
           </button>
-          <button onClick={() => navigate("/dashboard")} className="px-4 py-2 bg-gray-700 rounded-lg shadow-md hover:bg-gray-900">
+          <button
+            onClick={() => navigate("/dashboard")}
+            className="px-4 py-2 bg-gray-700 rounded-lg shadow-md hover:bg-gray-900"
+          >
             Dashboard
           </button>
-        <button onClick={() => navigate("/profile")} className="px-4 py-2 bg-gray-700 rounded-lg shadow-md hover:bg-gray-900">
+          <button
+            onClick={() => navigate("/profile")}
+            className="px-4 py-2 bg-gray-700 rounded-lg shadow-md hover:bg-gray-900"
+          >
             Profile
           </button>
         </div>
 
         {/* Right Side Actions */}
         <div className="flex space-x-4">
-          <button onClick={() => navigate("/new-expense")} className="px-4 py-2 bg-green-600 rounded-lg shadow-md hover:bg-green-800">
+          <button
+            onClick={() => navigate("/new-expense")}
+            className="px-4 py-2 bg-green-600 rounded-lg shadow-md hover:bg-green-800"
+          >
             New Expense
           </button>
-          <button onClick={() => navigate("/new-income")} className="px-4 py-2 bg-blue-600 rounded-lg shadow-md hover:bg-blue-800">
+          <button
+            onClick={() => navigate("/new-income")}
+            className="px-4 py-2 bg-blue-600 rounded-lg shadow-md hover:bg-blue-800"
+          >
             New Income
           </button>
-          <button onClick={handleLogout} className="px-4 py-2 bg-red-600 rounded-lg shadow-md hover:bg-red-800">
+          <button
+            onClick={handleLogout}
+            className="px-4 py-2 bg-red-600 rounded-lg shadow-md hover:bg-red-800"
+          >
             Logout
           </button>
         </div>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux'; // Import useSelector to get user authentication data
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; // Import useNavigate
 
 const ExpensesList = () => {
   const [expenses, setExpenses] = useState([]);
@@ -9,6 +9,7 @@ const ExpensesList = () => {
   const [page, setPage] = useState(1); // Track current page
 
   const { userAuth } = useSelector((state) => state.user); // Get the user authentication token from Redux
+  const navigate = useNavigate(); // Define the navigate function
 
   // Fetch expenses when the component mounts or when userAuth.token or page changes
   useEffect(() => {
@@ -17,7 +18,7 @@ const ExpensesList = () => {
     }
   }, [userAuth, page]); // Add page as dependency to fetch new page data
 
-  // Fetch expenses from the backend API
+  // ✅ Fetch expenses from the backend API
   const fetchExpenses = async (token, page) => {
     try {
       const response = await fetch(`http://localhost:8081/api/expenses?page=${page}`, {
@@ -50,7 +51,32 @@ const ExpensesList = () => {
     }
   };
 
-  // Handle loading and error states
+  // ✅ Function to Delete an Expense
+  const deleteExpense = async (expenseId) => {
+    if (!window.confirm("Are you sure you want to delete this expense?")) return;
+
+    try {
+      const response = await fetch(`http://localhost:8081/api/expenses/${expenseId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${userAuth?.token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete expense');
+      }
+
+      // ✅ Remove deleted expense from state
+      setExpenses(expenses.filter((exp) => exp._id !== expenseId));
+
+      alert("Expense deleted successfully!");
+    } catch (err) {
+      alert(`Error deleting expense: ${err.message}`);
+    }
+  };
+
+  // ✅ Handle loading and error states
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
 
@@ -95,8 +121,21 @@ const ExpensesList = () => {
                     <td>RS.{exp.amount}</td>
                     <td>{new Date(exp.date).toLocaleDateString()}</td>
                     <td>
-                      <button className="btn btn-sm btn-outline-primary">Edit</button>
-                      <button className="btn btn-sm btn-outline-danger ms-2">Delete</button>
+                      {/* Edit button */}
+                      <button 
+                        className="btn btn-outline-primary me-2"
+                        onClick={() => navigate(`/update-expense/${exp._id}`)}
+                      >
+                        Edit
+                      </button>
+                      
+                      {/* Delete button */}
+                      <button 
+                        className="btn btn-outline-danger"
+                        onClick={() => deleteExpense(exp._id)}
+                      >
+                        Delete
+                      </button>
                     </td>
                   </tr>
                 ))

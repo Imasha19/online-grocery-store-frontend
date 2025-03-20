@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { createExpenseAction } from "../../redux/slices/expenses/expensesSlices";
+import { createExpenseAction, resetSuccess } from "../../redux/slices/expenses/expensesSlices";
 
 // Form validation schema
 const formSchema = Yup.object({
@@ -14,7 +14,7 @@ const formSchema = Yup.object({
 const Expense = () => {
   const dispatch = useDispatch();
   const { userAuth } = useSelector((state) => state.user);
-  const { loading, appErr, serverErr, expenseCreated } = useSelector((state) => state.expenses);
+  const { expenseLoading, expenseError, expenseCreated } = useSelector((state) => state.expenses);
 
   // Initialize formik
   const formik = useFormik({
@@ -22,7 +22,7 @@ const Expense = () => {
       title: "",
       description: "",
       amount: "",
-      user: userAuth?._id || "", // Match schema (use `user` instead of `userId`)
+      user: userAuth?._id || "",
     },
     onSubmit: (values, { resetForm }) => {
       dispatch(createExpenseAction(values));
@@ -37,6 +37,15 @@ const Expense = () => {
       formik.setFieldValue("user", userAuth._id);
     }
   }, [userAuth]);
+
+  // ✅ Reset success message after 3 seconds
+  useEffect(() => {
+    if (expenseCreated) {
+      setTimeout(() => {
+        dispatch(resetSuccess()); // ✅ Dispatch action to reset success state
+      }, 3000);
+    }
+  }, [expenseCreated, dispatch]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-200">
@@ -115,15 +124,15 @@ const Expense = () => {
           <button
             type="submit"
             className="w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400"
-            disabled={loading}
+            disabled={expenseLoading}
           >
-            {loading ? "Submitting..." : "Submit Expense"}
+            {expenseLoading ? "Submitting..." : "Submit Expense"}
           </button>
         </form>
 
         {/* Error & Success Messages */}
-        {appErr || serverErr ? <div className="text-red-500 mt-4">{appErr || serverErr}</div> : null}
-        {expenseCreated && <div className="text-green-500 mt-4">Expense created successfully!</div>}
+        {expenseError && <div className="text-red-500 mt-4">{expenseError}</div>}
+        {expenseCreated && <div className="text-green-500 mt-4">✅ Expense created successfully!</div>}
       </div>
     </div>
   );

@@ -1,29 +1,29 @@
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux'; // Import useSelector to get user authentication data
-import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { Link, useNavigate } from 'react-router-dom';
 
-const AllExpenseList = () => {
+const ExpensesList = () => {
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [page, setPage] = useState(1); // Track current page
+  const [page, setPage] = useState(1);
 
-  const { userAuth } = useSelector((state) => state.user); // Get the user authentication token from Redux
+  const navigate = useNavigate();
+  const { userAuth } = useSelector((state) => state.user);
 
-  // Fetch expenses when the component mounts or when userAuth.token or page changes
   useEffect(() => {
     if (userAuth?.token) {
       fetchExpenses(userAuth.token, page);
     }
-  }, [userAuth, page]); // Add page as dependency to fetch new page data
+  }, [userAuth, page]);
 
-  // Fetch expenses from the backend API
+  // ✅ Function to Fetch Expenses
   const fetchExpenses = async (token, page) => {
     try {
       const response = await fetch(`http://localhost:8081/api/expenses?page=${page}`, {
         method: 'GET',
         headers: {
-          Authorization: `Bearer ${token}`, // Send token in the header for authorization
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -32,9 +32,7 @@ const AllExpenseList = () => {
       }
 
       const data = await response.json();
-      
-      // Assuming the expenses are in 'docs' property of the API response
-      setExpenses(data.docs || []); // Safely access 'docs' (array of expenses)
+      setExpenses(data.docs || []);
       setLoading(false);
     } catch (err) {
       setError(err.message);
@@ -42,53 +40,88 @@ const AllExpenseList = () => {
     }
   };
 
-  // Handle loading and error states
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+  // ✅ Function to Handle Delete Expense
+  const deleteExpense = async (expenseId) => {
+    if (!window.confirm("Are you sure you want to delete this expense?")) return;
+
+    try {
+      const response = await fetch(`http://localhost:8081/api/expenses/${expenseId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${userAuth?.token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete expense');
+      }
+
+      // ✅ Remove deleted expense from state
+      setExpenses(expenses.filter((exp) => exp._id !== expenseId));
+
+      alert("Expense deleted successfully!");
+    } catch (err) {
+      alert(`Error deleting expense: ${err.message}`);
+    }
+  };
+
+  // ✅ Handle loading and error states
+  if (loading) return <div className="text-center text-xl">Loading...</div>;
+  if (error) return <div className="text-center text-red-500">{`Error: ${error}`}</div>;
 
   return (
-    <section className="py-6">
-      <div className="container-fluid">
-        <div className="position-relative border rounded-2">
+    <section className="py-6 bg-gray-100 min-h-screen">
+      <div className="container mx-auto px-4">
+        <div className="bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="pt-8 px-8 mb-8">
-            <h6 className="mb-0 fs-3">Recent Expense Transactions</h6>
-            <p className="mb-0">
-              Below is the history of your expense transactions records.
-            </p>
-            <Link to="/new-expense" className="btn btn-outline-danger me-2 m-2">
+            <h6 className="mb-0 text-3xl font-semibold">Recent Expense Transactions</h6>
+            <p className="mb-4 text-lg">Below is the history of your expense transactions records.</p>
+            <Link to="/new-expense" className="btn bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition duration-300 ease-in-out">
               New Expense
             </Link>
           </div>
 
-          <table className="table">
+          <table className="table-auto w-full text-left">
             <thead>
-              <tr className="table-active">
-                <th>Withdrawn By</th>
-                <th>Title</th>
-                <th>Description</th>
-                <th>Amount</th>
-                <th>Date</th>
-                <th>Action</th>
+              <tr className="bg-gray-200">
+                <th className="px-4 py-2">Withdrawn By</th>
+                <th className="px-4 py-2">Title</th>
+                <th className="px-4 py-2">Description</th>
+                <th className="px-4 py-2">Amount</th>
+                <th className="px-4 py-2">Date</th>
+                <th className="px-4 py-2 min-w-[200px]">Action</th>
               </tr>
             </thead>
             <tbody>
               {expenses.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="text-center">
-                    <h2>No Expenses Found</h2>
+                  <td colSpan="6" className="text-center text-xl py-6">
+                    <h2 className="text-gray-500">No Expenses Found</h2>
                   </td>
                 </tr>
               ) : (
                 expenses.map((exp) => (
-                  <tr key={exp._id}>
-                    <td>{exp.user?.firstname} {exp.user?.lastname || "Unknown"}</td>
-                    <td>{exp.title}</td>
-                    <td>{exp.description}</td>
-                    <td>RS.{exp.amount}</td>
-                    <td>{new Date(exp.date).toLocaleDateString()}</td>
-                    <td>
-                      <button className="btn btn-sm btn-outline-primary">Edit</button>
-                      <button className="btn btn-sm btn-outline-danger ms-2">Delete</button>
+                  <tr key={exp._id} className="border-b hover:bg-gray-50">
+                    <td className="px-4 py-2">{exp.user?.firstname} {exp.user?.lastname || "Unknown"}</td>
+                    <td className="px-4 py-2">{exp.title}</td>
+                    <td className="px-4 py-2">{exp.description}</td>
+                    <td className="px-4 py-2">RS.{exp.amount}</td>
+                    <td className="px-4 py-2">{new Date(exp.date).toLocaleDateString()}</td>
+                    <td className="px-4 py-2 flex space-x-2">
+                      {/* Edit button */}
+                      <button 
+                        className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-300 ease-in-out"
+                        onClick={() => navigate(`/update-expense/${exp._id}`)}
+                      >
+                        Edit
+                      </button>
+                      {/* Delete button */}
+                      <button 
+                        className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition duration-300 ease-in-out"
+                        onClick={() => deleteExpense(exp._id)}
+                      >
+                        Delete
+                      </button>
                     </td>
                   </tr>
                 ))
@@ -97,17 +130,17 @@ const AllExpenseList = () => {
           </table>
 
           {/* Pagination Controls */}
-          <div className="d-flex justify-content-between">
+          <div className="flex justify-between py-4 px-8">
             <button 
-              className="btn btn-outline-secondary"
+              className="bg-gray-300 text-gray-700 hover:bg-gray-400 px-4 py-2 rounded-lg transition duration-300 ease-in-out"
               onClick={() => setPage(page - 1)} 
               disabled={page === 1}
             >
               Previous
             </button>
-            <span>Page {page}</span>
+            <span className="self-center text-lg">Page {page}</span>
             <button 
-              className="btn btn-outline-secondary"
+              className="bg-gray-300 text-gray-700 hover:bg-gray-400 px-4 py-2 rounded-lg transition duration-300 ease-in-out"
               onClick={() => setPage(page + 1)}
             >
               Next
@@ -119,4 +152,4 @@ const AllExpenseList = () => {
   );
 };
 
-export default AllExpenseList;
+export default ExpensesList;
