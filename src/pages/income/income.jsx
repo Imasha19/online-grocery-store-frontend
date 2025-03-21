@@ -1,113 +1,138 @@
-import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import { createIncomeAction, resetSuccess } from "../../redux/slices/income/incomeSlices";
 
 const Income = () => {
-  const { userAuth } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
+  const userState = useSelector((state) => state?.user || {}); // ✅ Safe Access
+  const incomeState = useSelector((state) => state?.income || {}); // ✅ Safe Access
 
-  const [incomeData, setIncomeData] = useState({
-    title: "",
-    amount: "",
-    description: "",
-    userId: "",
-    date: new Date().toISOString().split("T")[0], // Auto-filled date
+  const userAuth = userState?.userAuth || null;
+  const { incomeLoading, incomeError, incomeSuccess } = incomeState;
+
+  // ✅ Debugging: Log Redux State
+  console.log("Redux User State:", userState);
+  console.log("Redux Income State:", incomeState);
+  console.log("Income Success:", incomeSuccess); // ✅ Check if this updates
+
+  // ✅ State for Success Message
+  const [successMessage, setSuccessMessage] = useState("");
+
+  const formik = useFormik({
+    initialValues: {
+      title: "",
+      description: "",
+      amount: "",
+      user: userAuth?._id || "", // ✅ Safe Access
+    },
+    validationSchema: Yup.object({
+      title: Yup.string().required("Title is required"),
+      description: Yup.string().required("Description is required"),
+      amount: Yup.number()
+        .required("Amount is required")
+        .positive("Amount must be positive"),
+    }),
+    onSubmit: (values, { resetForm }) => {
+      console.log("Submitting Income Data:", values);
+      dispatch(createIncomeAction(values));
+      resetForm();
+    },
   });
 
   useEffect(() => {
     if (userAuth) {
-      setIncomeData((prevData) => ({
-        ...prevData,
-        userId: userAuth._id, // Auto-fill user ID
-      }));
+      formik.setFieldValue("user", userAuth._id);
     }
   }, [userAuth]);
 
-  const handleChange = (e) => {
-    setIncomeData({ ...incomeData, [e.target.name]: e.target.value });
-  };
+  useEffect(() => {
+    if (incomeSuccess) {
+      console.log("✅ Income successfully submitted!"); // ✅ Debugging log
+      setSuccessMessage("✅ Income data submitted successfully!");
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Income Data Submitted:", incomeData);
-  };
+      setTimeout(() => {
+        setSuccessMessage(""); // ✅ Clear message after 3 seconds
+        dispatch(resetSuccess());
+      }, 3000);
+    }
+  }, [incomeSuccess, dispatch]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-200">
-      <div className="max-w-lg w-full bg-green-500 shadow-lg rounded-lg p-6">
-        {/* Image Section */}
-        <div className="flex justify-center mb-4">
-          <img
-            src="/income.svg" // Make sure this image is inside the public folder
-            alt="Income"
-            className="w-20 h-20"
-          />
-        </div>
-
+      <div className="max-w-lg w-full bg-white shadow-lg rounded-lg p-6">
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
           Add New Income
         </h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Title Field */}
-          <div className="flex items-center">
-            <label className="w-1/3 text-gray-700 font-medium">Title</label>
+
+        {/* Show Error Message if userAuth is missing */}
+        {!userAuth && (
+          <div className="text-red-500 text-center mb-4">
+            ⚠️ Error: User not authenticated!
+          </div>
+        )}
+
+        <form onSubmit={formik.handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-gray-700 font-medium">Title</label>
             <input
               type="text"
               name="title"
-              value={incomeData.title}
-              onChange={handleChange}
-              required
-              className="w-2/3 px-3 py-2 border bg-blue-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-              placeholder="Enter income title"
+              value={formik.values.title}
+              onChange={formik.handleChange}
+              className="w-full px-3 py-2 border bg-blue-100 rounded-md"
             />
+            {formik.errors.title && formik.touched.title && (
+              <div className="text-red-500 text-sm">{formik.errors.title}</div>
+            )}
           </div>
 
-          {/* Amount Field */}
-          <div className="flex items-center">
-            <label className="w-1/3 text-gray-700 font-medium">Amount</label>
+          <div>
+            <label className="block text-gray-700 font-medium">Amount</label>
             <input
               type="number"
               name="amount"
-              value={incomeData.amount}
-              onChange={handleChange}
-              required
-              className="w-2/3 px-3 py-2 border bg-blue-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-              placeholder="Enter amount"
+              value={formik.values.amount}
+              onChange={formik.handleChange}
+              className="w-full px-3 py-2 border bg-blue-100 rounded-md"
             />
+            {formik.errors.amount && formik.touched.amount && (
+              <div className="text-red-500 text-sm">{formik.errors.amount}</div>
+            )}
           </div>
 
-          {/* Description Field */}
-          <div className="flex items-center">
-            <label className="w-1/3 text-gray-700 font-medium">Description</label>
+          <div>
+            <label className="block text-gray-700 font-medium">Description</label>
             <textarea
               name="description"
-              value={incomeData.description}
-              onChange={handleChange}
-              required
-              className="w-2/3 px-3 py-2 border bg-blue-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-              placeholder="Enter description"
-            ></textarea>
-          </div>
-
-          {/* User ID (Auto-filled) */}
-          <div className="flex items-center">
-            <label className="w-1/3 text-gray-700 font-medium">User ID</label>
-            <input
-              type="text"
-              name="userId"
-              value={incomeData.userId}
-              readOnly
-              className="w-2/3 px-3 py-2 border bg-blue-100 rounded-md focus:outline-none"
+              value={formik.values.description}
+              onChange={formik.handleChange}
+              className="w-full px-3 py-2 border bg-blue-100 rounded-md"
             />
+            {formik.errors.description && formik.touched.description && (
+              <div className="text-red-500 text-sm">{formik.errors.description}</div>
+            )}
           </div>
-
-         
 
           <button
             type="submit"
-            className="w-full bg-black text-white py-2 px-4 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400"
+            className="w-full bg-green-500 text-white py-2 px-4 rounded-md"
+            disabled={incomeLoading}
           >
-            Submit Income
+            {incomeLoading ? "Submitting..." : "Submit Income"}
+            
           </button>
+          
+
         </form>
+
+        {incomeError && <div className="text-red-500 mt-4">{incomeError}</div>}
+        
+        {/* ✅ Show Success Message */}
+        {successMessage && (
+          <div className="text-green-500 mt-4 text-center">{successMessage}</div>
+        )}
       </div>
     </div>
   );

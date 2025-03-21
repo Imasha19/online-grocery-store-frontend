@@ -24,6 +24,24 @@ const FinanceWelcome = () => {
     }
   };
 
+  // Handle navigation to Income List (same logic as Expenses List)
+  const handleIncomeListClick = () => {
+    if (userAuth?.isAdmin) {
+      navigate("/income-list");
+    } else {
+      alert("You do not have permission to view the Income List.");
+    }
+  };
+
+    // Handle navigation to Dashboard
+    const handleDashboardClick = () => {
+      if (userAuth?.isAdmin) {
+        navigate("/dashboard");
+      } else {
+        alert("You do not have permission to view the Income List.");
+      }
+    };
+
   return (
     <div
       className="min-h-screen flex flex-col bg-cover bg-center text-white"
@@ -34,19 +52,19 @@ const FinanceWelcome = () => {
         {/* Left Side Navigation */}
         <div className="flex space-x-4">
           <button
-            onClick={handleExpensesListClick} // Use the function here
+            onClick={handleExpensesListClick} // Updated to check permissions
             className="px-4 py-2 bg-gray-700 rounded-lg shadow-md hover:bg-gray-900"
           >
             Expenses List
           </button>
           <button
-            onClick={() => navigate("/income")}
+            onClick={handleIncomeListClick} // Updated to check permissions
             className="px-4 py-2 bg-gray-700 rounded-lg shadow-md hover:bg-gray-900"
           >
             Income List
           </button>
           <button
-            onClick={() => navigate("/dashboard")}
+            onClick={handleDashboardClick}
             className="px-4 py-2 bg-gray-700 rounded-lg shadow-md hover:bg-gray-900"
           >
             Dashboard
@@ -90,14 +108,7 @@ const FinanceWelcome = () => {
           <p className="text-lg text-gray-300 mt-3">
             Keep track of your income and expenses effortlessly with our powerful financial dashboard.
           </p>
-          <div className="mt-6">
-            <button
-              onClick={() => navigate("/performance")}
-              className="bg-yellow-500 text-white py-3 px-6 rounded-lg shadow-md transition duration-300 hover:bg-yellow-600"
-            >
-              Track Your Performance
-            </button>
-          </div>
+         
         </div>
       </section>
 

@@ -10,8 +10,11 @@ import Expense from './pages/expense/expenses';
 import ExpensesList from './pages/expense/ExpensesList';
 import AllExpenseList from './pages/expense/AllExpenseList';
 import EditContent from './pages/expense/EditExpenses';
-
-
+import IncomeList from './pages/income/AllIncomeList';
+import IncomeL from './pages/income/incomeList';
+import EditIncome from './pages/income/EditIncome';
+import FinanceDashboard from './pages/Dashboard/FinanceDashboard';
+import ProfitLossStatement from './pages/Dashboard/Profit-loss';
 function App() {
   return (
     <BrowserRouter>
@@ -26,6 +29,11 @@ function App() {
         <Route exact path="/expenses" element={<ExpensesList />} />
         <Route exact path="/expenses-list" element={<AllExpenseList />} />
         <Route exact path="/update-expense/:id" element={<EditContent />} />
+        <Route exact path="/income-list" element={<IncomeList />} />
+        <Route exact path="/update-income/:id" element={<EditIncome />} />
+        <Route exact path="/income" element={<IncomeL />} />
+        <Route exact path="/dashboard" element={<FinanceDashboard />} />
+        <Route exact path="/profit-loss" element={<ProfitLossStatement />} />
 
       </Routes>
     </BrowserRouter>

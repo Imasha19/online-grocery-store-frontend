@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
+import { jsPDF } from 'jspdf';
 
 const ExpensesList = () => {
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
-
-  const navigate = useNavigate();
   const { userAuth } = useSelector((state) => state.user);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (userAuth?.token) {
@@ -17,7 +17,7 @@ const ExpensesList = () => {
     }
   }, [userAuth, page]);
 
-  // ✅ Function to Fetch Expenses
+  // Fetch Expenses Function
   const fetchExpenses = async (token, page) => {
     try {
       const response = await fetch(`http://localhost:8081/api/expenses?page=${page}`, {
@@ -40,9 +40,9 @@ const ExpensesList = () => {
     }
   };
 
-  // ✅ Function to Handle Delete Expense
+  // Delete Expense Function
   const deleteExpense = async (expenseId) => {
-    if (!window.confirm("Are you sure you want to delete this expense?")) return;
+    if (!window.confirm('Are you sure you want to delete this expense?')) return;
 
     try {
       const response = await fetch(`http://localhost:8081/api/expenses/${expenseId}`, {
@@ -56,18 +56,57 @@ const ExpensesList = () => {
         throw new Error('Failed to delete expense');
       }
 
-      // ✅ Remove deleted expense from state
+      // Remove deleted expense from state
       setExpenses(expenses.filter((exp) => exp._id !== expenseId));
-
-      alert("Expense deleted successfully!");
+      alert('Expense deleted successfully!');
     } catch (err) {
       alert(`Error deleting expense: ${err.message}`);
     }
   };
 
-  // ✅ Handle loading and error states
+  const generatePDF = () => {
+    const doc = new jsPDF();
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(14);
+
+    doc.text('Expense Transactions List', 14, 10);
+    doc.setLineWidth(0.5);
+    doc.line(14, 12, 200, 12);
+
+    doc.setFontSize(12);
+    doc.text('Withdrawn By', 14, 20);
+    doc.text('Title', 60, 20);
+    doc.text('Amount', 160, 20);
+    doc.text('Date', 180, 20);
+    doc.setLineWidth(0.5);
+    doc.line(14, 22, 200, 22);
+
+    let rowY = 30;
+    expenses.forEach((exp) => {
+      doc.text(`${exp.user?.firstname} ${exp.user?.lastname || 'Unknown'}`, 14, rowY);
+      doc.text(exp.title, 60, rowY);
+      doc.text(`RS.${exp.amount}`, 160, rowY);
+      doc.text(new Date(exp.date).toLocaleDateString(), 180, rowY);
+      rowY += 10;
+      if (rowY < 270) {
+        doc.line(14, rowY + 2, 200, rowY + 2);
+      }
+    });
+
+    doc.setFontSize(10);
+    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, rowY + 10);
+    doc.save('expenses-list.pdf');
+  };
+
+  // Handle loading and error states
   if (loading) return <div className="text-center text-xl">Loading...</div>;
   if (error) return <div className="text-center text-red-500">{`Error: ${error}`}</div>;
+
+  
+
+
+
+
 
   return (
     <section className="py-6 bg-gray-100 min-h-screen">
@@ -76,9 +115,20 @@ const ExpensesList = () => {
           <div className="pt-8 px-8 mb-8">
             <h6 className="mb-0 text-3xl font-semibold">Recent Expense Transactions</h6>
             <p className="mb-4 text-lg">Below is the history of your expense transactions records.</p>
-            <Link to="/new-expense" className="btn bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition duration-300 ease-in-out">
+            <Link
+              to="/new-expense"
+              className="btn bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition duration-300 ease-in-out"
+            >
               New Expense
             </Link>
+
+            {/* Generate PDF Button */}
+            <button
+              onClick={generatePDF}
+              className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-300 ease-in-out mt-4"
+            >
+              Generate PDF
+            </button>
           </div>
 
           <table className="table-auto w-full text-left">
@@ -102,21 +152,21 @@ const ExpensesList = () => {
               ) : (
                 expenses.map((exp) => (
                   <tr key={exp._id} className="border-b hover:bg-gray-50">
-                    <td className="px-4 py-2">{exp.user?.firstname} {exp.user?.lastname || "Unknown"}</td>
+                    <td className="px-4 py-2">
+                      {exp.user?.firstname} {exp.user?.lastname || 'Unknown'}
+                    </td>
                     <td className="px-4 py-2">{exp.title}</td>
                     <td className="px-4 py-2">{exp.description}</td>
                     <td className="px-4 py-2">RS.{exp.amount}</td>
                     <td className="px-4 py-2">{new Date(exp.date).toLocaleDateString()}</td>
                     <td className="px-4 py-2 flex space-x-2">
-                      {/* Edit button */}
-                      <button 
+                      <button
                         className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-300 ease-in-out"
                         onClick={() => navigate(`/update-expense/${exp._id}`)}
                       >
                         Edit
                       </button>
-                      {/* Delete button */}
-                      <button 
+                      <button
                         className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition duration-300 ease-in-out"
                         onClick={() => deleteExpense(exp._id)}
                       >
@@ -131,15 +181,15 @@ const ExpensesList = () => {
 
           {/* Pagination Controls */}
           <div className="flex justify-between py-4 px-8">
-            <button 
+            <button
               className="bg-gray-300 text-gray-700 hover:bg-gray-400 px-4 py-2 rounded-lg transition duration-300 ease-in-out"
-              onClick={() => setPage(page - 1)} 
+              onClick={() => setPage(page - 1)}
               disabled={page === 1}
             >
               Previous
             </button>
             <span className="self-center text-lg">Page {page}</span>
-            <button 
+            <button
               className="bg-gray-300 text-gray-700 hover:bg-gray-400 px-4 py-2 rounded-lg transition duration-300 ease-in-out"
               onClick={() => setPage(page + 1)}
             >
