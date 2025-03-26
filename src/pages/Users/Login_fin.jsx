@@ -31,7 +31,7 @@ const Login_fin = () => {
   useEffect(() => {
     if (isLogin) {
       console.log("User information:", userAuth);
-      navigate("/home_fin"); // Navigate to home page after successful login
+      navigate("/home_fin"); 
     }
   }, [isLogin, userAuth, navigate]);
 

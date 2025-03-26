@@ -5,9 +5,11 @@ import { jsPDF } from 'jspdf';
 
 const ExpensesList = () => {
   const [expenses, setExpenses] = useState([]);
+  const [filteredExpenses, setFilteredExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState(""); // State for search query
   const { userAuth } = useSelector((state) => state.user);
   const navigate = useNavigate();
 
@@ -33,12 +35,27 @@ const ExpensesList = () => {
 
       const data = await response.json();
       setExpenses(data.docs || []);
+      setFilteredExpenses(data.docs || []); // Initialize with all expenses
       setLoading(false);
     } catch (err) {
       setError(err.message);
       setLoading(false);
     }
   };
+
+  // Handle search query and filter expenses
+  useEffect(() => {
+    if (searchQuery) {
+      const filtered = expenses.filter((exp) =>
+        exp.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        exp.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        exp.amount.toString().includes(searchQuery)
+      );
+      setFilteredExpenses(filtered);
+    } else {
+      setFilteredExpenses(expenses); // Show all expenses if search query is empty
+    }
+  }, [searchQuery, expenses]);
 
   // Delete Expense Function
   const deleteExpense = async (expenseId) => {
@@ -58,6 +75,7 @@ const ExpensesList = () => {
 
       // Remove deleted expense from state
       setExpenses(expenses.filter((exp) => exp._id !== expenseId));
+      setFilteredExpenses(filteredExpenses.filter((exp) => exp._id !== expenseId)); // Update filtered expenses
       alert('Expense deleted successfully!');
     } catch (err) {
       alert(`Error deleting expense: ${err.message}`);
@@ -82,7 +100,7 @@ const ExpensesList = () => {
     doc.line(14, 22, 200, 22);
 
     let rowY = 30;
-    expenses.forEach((exp) => {
+    filteredExpenses.forEach((exp) => {
       doc.text(`${exp.user?.firstname} ${exp.user?.lastname || 'Unknown'}`, 14, rowY);
       doc.text(exp.title, 60, rowY);
       doc.text(`RS.${exp.amount}`, 160, rowY);
@@ -101,12 +119,6 @@ const ExpensesList = () => {
   // Handle loading and error states
   if (loading) return <div className="text-center text-xl">Loading...</div>;
   if (error) return <div className="text-center text-red-500">{`Error: ${error}`}</div>;
-
-  
-
-
-
-
 
   return (
     <section className="py-6 bg-gray-100 min-h-screen">
@@ -131,6 +143,17 @@ const ExpensesList = () => {
             </button>
           </div>
 
+          {/* Search Bar */}
+          <div className="px-8 py-4">
+            <input
+              type="text"
+              placeholder="Search by Title, Description, or Amount"
+              className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+
           <table className="table-auto w-full text-left">
             <thead>
               <tr className="bg-gray-200">
@@ -143,14 +166,14 @@ const ExpensesList = () => {
               </tr>
             </thead>
             <tbody>
-              {expenses.length === 0 ? (
+              {filteredExpenses.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="text-center text-xl py-6">
                     <h2 className="text-gray-500">No Expenses Found</h2>
                   </td>
                 </tr>
               ) : (
-                expenses.map((exp) => (
+                filteredExpenses.map((exp) => (
                   <tr key={exp._id} className="border-b hover:bg-gray-50">
                     <td className="px-4 py-2">
                       {exp.user?.firstname} {exp.user?.lastname || 'Unknown'}

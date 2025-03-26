@@ -40,10 +40,11 @@ const ProfitLossStatement = () => {
 
       const totalIncome = incomeData.totalIncome || 0;
       const totalExpenses = expenseData.totalExpenses || 0;
+      const netProfitLoss = totalIncome - totalExpenses;
 
       setRevenue(totalIncome);
       setExpenses(totalExpenses);
-      setProfitLoss(totalIncome - totalExpenses);
+      setProfitLoss(netProfitLoss);
       setLoading(false);
     } catch (err) {
       setError(err.message);
@@ -55,24 +56,20 @@ const ProfitLossStatement = () => {
     const doc = new jsPDF();
     doc.setFont("helvetica", "normal");
 
-    // Title
     doc.setFontSize(20);
     doc.text("Profit & Loss Statement", 105, 20, { align: "center" });
 
-    // Table header
     doc.setFontSize(12);
     doc.text("Category", 20, 40);
     doc.text("Amount (RS.)", 140, 40);
 
-    // Revenue, Expenses, Profit/Loss
     doc.text("Total Revenue", 20, 50);
     doc.text(`RS. ${revenue}`, 140, 50);
     doc.text("Total Expenses", 20, 60);
     doc.text(`RS. ${expenses}`, 140, 60);
     doc.text("Net Profit/Loss", 20, 70);
-    doc.text(`RS. ${profitLoss}`, 140, 70);
+    doc.text(`${profitLoss >= 0 ? "Profit" : "Loss"}: RS. ${Math.abs(profitLoss)}`, 140, 70);
 
-    // Save the generated PDF
     doc.save("profit_loss_statement.pdf");
   };
 
@@ -81,7 +78,6 @@ const ProfitLossStatement = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Header */}
       <header className="w-full bg-blue-600 p-6 shadow-lg flex justify-between items-center">
         <h1 className="text-white text-3xl font-semibold">Profit & Loss Statement</h1>
         <button
@@ -92,17 +88,14 @@ const ProfitLossStatement = () => {
         </button>
       </header>
 
-      {/* Main Content */}
       <main className="container mx-auto p-6 space-y-6">
-        {/* Profit/Loss Card */}
         <div className="bg-white p-6 rounded-lg shadow-md text-center">
           <h3 className="text-lg font-semibold text-gray-700">Profit/Loss</h3>
           <p className={`text-2xl font-bold ${profitLoss >= 0 ? "text-green-600" : "text-red-600"}`}>
-            RS. {profitLoss}
+            {profitLoss >= 0 ? "Profit" : "Loss"}: RS. {Math.abs(profitLoss)}
           </p>
         </div>
 
-        {/* Profit-Loss Statement Table */}
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-xl font-semibold text-gray-700 mb-4">Profit-Loss Statement</h2>
           <table className="w-full border-collapse border border-gray-300">
@@ -124,14 +117,13 @@ const ProfitLossStatement = () => {
               <tr className="bg-gray-100 font-bold">
                 <td className="border p-3">Net Profit/Loss</td>
                 <td className={`border p-3 text-right ${profitLoss >= 0 ? "text-green-600" : "text-red-600"}`}>
-                  {profitLoss}
+                  {profitLoss >= 0 ? "Profit" : "Loss"}: RS. {Math.abs(profitLoss)}
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        {/* Button to generate PDF */}
         <div className="flex justify-center mt-6">
           <button
             onClick={generatePDF}

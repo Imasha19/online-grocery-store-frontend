@@ -6,9 +6,11 @@ import { jsPDF } from 'jspdf';
 
 const IncomeList = () => {
   const [incomeList, setIncomeList] = useState([]);
+  const [filteredIncome, setFilteredIncome] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState(""); // State for search query
   const { userAuth } = useSelector((state) => state.user);
   const navigate = useNavigate();
 
@@ -17,6 +19,20 @@ const IncomeList = () => {
       fetchIncome(userAuth.token, page);
     }
   }, [userAuth?.token, page]);
+
+  useEffect(() => {
+    if (searchQuery) {
+      // Filter income list based on search query
+      const filtered = incomeList.filter((inc) =>
+        inc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        inc.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        inc.amount.toString().includes(searchQuery)
+      );
+      setFilteredIncome(filtered);
+    } else {
+      setFilteredIncome(incomeList); // Show all income if search query is empty
+    }
+  }, [searchQuery, incomeList]);
 
   const fetchIncome = async (token, page) => {
     try {
@@ -29,6 +45,7 @@ const IncomeList = () => {
 
       const data = await response.json();
       setIncomeList(data.docs || []);
+      setFilteredIncome(data.docs || []); // Initially, no filter is applied
       setLoading(false);
     } catch (err) {
       setError(err.message);
@@ -48,6 +65,7 @@ const IncomeList = () => {
       if (!response.ok) throw new Error('Failed to delete income');
 
       setIncomeList(incomeList.filter((inc) => inc._id !== incomeId));
+      setFilteredIncome(filteredIncome.filter((inc) => inc._id !== incomeId)); // Update filtered income as well
       alert('Income deleted successfully!');
     } catch (err) {
       alert(`Error deleting income: ${err.message}`);
@@ -70,14 +88,14 @@ const IncomeList = () => {
     doc.line(14, 22, 200, 22);
 
     let rowY = 30;
-    incomeList.forEach((inc, index) => {
+    filteredIncome.forEach((inc, index) => {
       const userName = inc.user ? `${inc.user.firstname} ${inc.user.lastname || ''}` : 'Unknown';
       doc.text(userName, 14, rowY);
       doc.text(inc.title, 70, rowY);
       doc.text(`RS.${inc.amount}`, 140, rowY);
       doc.text(new Date(inc.date).toLocaleDateString(), 180, rowY);
       rowY += 10;
-      if (index !== incomeList.length - 1) {
+      if (index !== filteredIncome.length - 1) {
         doc.line(14, rowY + 2, 200, rowY + 2);
       }
     });
@@ -97,7 +115,7 @@ const IncomeList = () => {
           <div className="pt-8 px-8 flex justify-between items-center">
             <div>
               <h6 className="text-3xl font-semibold">Recent Income Transactions</h6>
-              <p className="text-lg">Below is the history of your income transactions.</p>
+              <p className="text-lg text-gray-600">Below is the history of your income transactions.</p>
             </div>
             <button
               className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition duration-300"
@@ -105,6 +123,17 @@ const IncomeList = () => {
             >
               Generate PDF
             </button>
+          </div>
+
+          {/* Search Bar */}
+          <div className="px-8 py-4">
+            <input
+              type="text"
+              placeholder="Search by Title, Description, or Amount"
+              className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
 
           <table className="table-auto w-full text-left mt-4">
@@ -119,12 +148,12 @@ const IncomeList = () => {
               </tr>
             </thead>
             <tbody>
-              {incomeList.length === 0 ? (
+              {filteredIncome.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="text-center text-xl py-6">No Income Records Found</td>
+                  <td colSpan="6" className="text-center text-xl py-6 text-gray-500">No Income Records Found</td>
                 </tr>
               ) : (
-                incomeList.map((inc) => (
+                filteredIncome.map((inc) => (
                   <tr key={inc._id} className="border-b hover:bg-gray-50">
                     <td className="px-4 py-2">{inc.user?.firstname} {inc.user?.lastname || 'Unknown'}</td>
                     <td className="px-4 py-2">{inc.title}</td>

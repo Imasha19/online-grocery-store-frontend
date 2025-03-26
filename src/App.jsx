@@ -15,11 +15,13 @@ import IncomeL from './pages/income/incomeList';
 import EditIncome from './pages/income/EditIncome';
 import FinanceDashboard from './pages/Dashboard/FinanceDashboard';
 import ProfitLossStatement from './pages/Dashboard/Profit-loss';
+import Home from './pages/New_Welcome';
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route exact path="/" element={<Wlcm_fin />} /> 
+        <Route exact path="/welcome" element={<Wlcm_fin />} /> 
+        <Route exact path="/" element={<Home />} />
         <Route exact path="/home_fin" element={<Home_fin />} />
         <Route exact path="/login" element={<Login_fin />} />
         <Route exact path="/register" element={<Register_fin />} />

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import moneySVG from "../../img/money.svg";
@@ -16,7 +16,6 @@ const formSchema = Yup.object({
 
 const EditContent = () => {
   const { id } = useParams(); // Get the expense ID from URL
-  const navigate = useNavigate();
   const [expLoading, setExpLoading] = useState(false);
   const [expServerErr, setExpServerErr] = useState(null);
   const [initialValues, setInitialValues] = useState({
@@ -92,10 +91,10 @@ const EditContent = () => {
         if (!response.ok) throw new Error("Failed to update expense");
 
         alert("Expense updated successfully!");
-
-        navigate("/expenses");
+        setExpLoading(false); // Stop loading after update
       } catch (error) {
         setExpServerErr(error.message);
+        setExpLoading(false);
       }
     },
   });

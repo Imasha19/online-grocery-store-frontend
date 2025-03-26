@@ -3,7 +3,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useDispatch, useSelector } from "react-redux";
 import { registerUserAction } from "../../redux/slices/users/userSlices";
-import { useNavigate } from "react-router-dom"; // Import useNavigate from react-router-dom
+import { useNavigate } from "react-router-dom"; 
 
 // Form validation
 const formSchema = Yup.object({
@@ -24,7 +24,7 @@ const formSchema = Yup.object({
 
 const Register_fin = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate(); 
   const { userLoading, userAppErr, userServerErr, isLogin, userAuth } = useSelector((state) => state.user);
 
   // State for success message
@@ -47,17 +47,17 @@ const Register_fin = () => {
   useEffect(() => {
     if (isLogin) {
       console.log("User information:", userAuth);
-      // Set success message if registration is successful
+      
       setSuccessMessage("Registration successful!");
 
-      // Redirect to login page after 2 seconds
+      
       setTimeout(() => {
-        navigate("/login"); // Navigate to login page
+        navigate("/login"); 
       }, 2000); // Wait for 2 seconds before redirecting
     }
   }, [isLogin, userAuth, navigate]);
 
-  // Navigate to login page when Sign In button is clicked
+ 
   const navigateToLogin = () => {
     navigate("/login");
   };
