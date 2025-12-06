@@ -1,8 +1,29 @@
-# React + Vite
+# Online Grocery Store Frontend (Vite + React)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Environment Variables
 
-Currently, two official plugins are available:
+Create a `.env` file (never commit it) alongside this README and add:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+```
+VITE_API_BASE_URL=https://your-backend-domain.vercel.app/api
+```
+
+During local development this value can be omitted because the Vite dev server proxies `/api` calls to `http://localhost:3000`. For production builds (Vercel, Netlify, etc.) you must point to the deployed backend URL so that Axios calls reach the correct server.
+
+## Local Development
+
+```bash
+pnpm install   # or npm install / yarn
+pnpm dev       # served at http://localhost:5175
+```
+
+Ensure the backend is running locally on port 3000 so the Vite proxy can forward `/api` calls.
+
+## Building for Production
+
+```bash
+pnpm build     # outputs static assets in dist/
+pnpm preview   # optional local preview
+```
+
+The `dist` folder can be deployed on Vercel using the “Vite” framework preset. Point the backend URL in `.env` to your deployed API before triggering a production build.*** End Patch
